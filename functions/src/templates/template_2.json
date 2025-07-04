@@ -1,0 +1,16 @@
+{
+  "template_id": "T002",
+  "department_name": "Pediatrics",
+  "questions": [
+    {
+      "question_id": "Q1",
+      "text": "What is the child's temperature?",
+      "type": "text"
+    },
+    {
+      "question_id": "Q2",
+      "text": "Is the child up to date on vaccinations?",
+      "type": "boolean"
+    }
+  ]
+}

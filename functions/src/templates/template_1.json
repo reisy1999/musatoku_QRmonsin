@@ -1,0 +1,16 @@
+{
+  "template_id": "T001",
+  "department_name": "Internal Medicine",
+  "questions": [
+    {
+      "question_id": "Q1",
+      "text": "What are your symptoms?",
+      "type": "text"
+    },
+    {
+      "question_id": "Q2",
+      "text": "Do you have any allergies?",
+      "type": "boolean"
+    }
+  ]
+}
