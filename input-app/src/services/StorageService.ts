@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface IStorageService {
   // 将来的な拡張例：
   // saveFormData(data: any): Promise<void>;
