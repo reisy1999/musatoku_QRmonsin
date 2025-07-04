@@ -1,106 +1,223 @@
-import type { Template, Question } from "../types/Questionnaire";
+import { useEffect } from 'react'
+import type { Template, Question, Coordinate, FormState } from '../types/Questionnaire'
+import { StepPainLocation } from './StepPainLocation'
 
 interface Props {
-  template: Template;
-  answers: Record<string, any>;
-  onAnswer: (questionId: string, answer: any) => void;
-  onNext: () => void;
-  onBack: () => void;
+  template: Template
+  answers: FormState['answers']
+  onAnswer: (questionId: string, answer: FormState['answers'][string] | undefined) => void
+  onNext: () => void
+  onBack: () => void
 }
 
 export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack }: Props) => {
-
-  const validateForm = () => {
-    for (const q of template.questions) {
-      // conditional_on で非表示の場合はバリデーション対象外
-      if (q.conditional_on) {
-        const targetAnswer = answers[q.conditional_on.field];
-        if (targetAnswer !== q.conditional_on.value) {
-          continue;
-        }
-      }
-
-      if (q.required) {
-        const answer = answers[q.id];
-        if (answer === undefined || answer === null || answer === '') {
-          return false; // 未入力の必須項目がある
-        }
-        if (Array.isArray(answer) && answer.length === 0) {
-          return false; // multi_select で未選択
-        }
+  const getError = (q: Question): string | null => {
+    // skip if hidden
+    if (q.conditional_on) {
+      const target = answers[q.conditional_on.field]
+      if (target !== q.conditional_on.value) {
+        return null
       }
     }
-    return true; // すべての必須項目が入力されている
-  };
+    const v = answers[q.id]
+    if (q.required) {
+      if (v === undefined || v === null || v === '') {
+        return 'この項目は必須です。'
+      }
+      if (Array.isArray(v) && v.length === 0) {
+        return 'この項目は必須です。'
+      }
+    }
+    if (v !== undefined && v !== null && v !== '') {
+      if ((q.type === 'text' || q.type === 'textarea') && q.maxLength && String(v).length > q.maxLength) {
+        return `最大${q.maxLength}文字までです。`
+      }
+      if ((q.type === 'text' || q.type === 'textarea') && q.validationRegex) {
+        const r = new RegExp(q.validationRegex)
+        if (!r.test(String(v))) return '形式が正しくありません。'
+      }
+      if (q.type === 'number') {
+        const num = Number(v)
+        if (Number.isNaN(num)) return '数値を入力してください。'
+        if (q.min !== undefined && num < q.min) return `${q.min}以上を入力してください。`
+        if (q.max !== undefined && num > q.max) return `${q.max}以下を入力してください。`
+      }
+    }
+    return null
+  }
 
-  const isFormValid = validateForm();
+  // remove answers for hidden questions
+  useEffect(() => {
+    template.questions.forEach((q) => {
+      if (q.conditional_on) {
+        const target = answers[q.conditional_on.field]
+        if (target !== q.conditional_on.value && answers[q.id] !== undefined) {
+          onAnswer(q.id, undefined)
+        }
+      }
+    })
+  }, [answers, template, onAnswer])
+
+  const errors = template.questions.reduce<Record<string, string | null>>((acc, q) => {
+    acc[q.id] = getError(q)
+    return acc
+  }, {})
+
+  const isFormValid = Object.values(errors).every((e) => e === null)
 
   const renderQuestion = (q: Question) => {
-    // conditional_on の評価
     if (q.conditional_on) {
-      const targetAnswer = answers[q.conditional_on.field];
-      if (targetAnswer !== q.conditional_on.value) {
-        return null;
+      const target = answers[q.conditional_on.field]
+      if (target !== q.conditional_on.value) {
+        return null
       }
     }
+
+    const error = errors[q.id]
+    const common = 'w-full p-2 border rounded'
 
     switch (q.type) {
       case 'text':
-        return <div key={q.id} className="mb-4">
-          <label className="block mb-1">{q.text} {q.required && <span className="text-red-500">*</span>}</label>
-          <input type="text" value={answers[q.id] || ''} onChange={e => onAnswer(q.id, e.target.value)} className="w-full p-2 border rounded" />
-          {q.required && (answers[q.id] === undefined || answers[q.id] === '') && <p className="text-red-500 text-sm">この項目は必須です。</p>}
-        </div>
+        return (
+          <div key={q.id} className="mb-4">
+            <label className="block mb-1">
+              {q.text} {q.required && <span className="text-red-500">*</span>}
+            </label>
+            <input
+              type="text"
+              value={typeof answers[q.id] === 'string' || typeof answers[q.id] === 'number' ? answers[q.id] as string | number : ''}
+              onChange={(e) => onAnswer(q.id, e.target.value)}
+              className={common}
+            />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+        )
+      case 'textarea':
+        return (
+          <div key={q.id} className="mb-4">
+            <label className="block mb-1">
+              {q.text} {q.required && <span className="text-red-500">*</span>}
+            </label>
+            <textarea
+              value={typeof answers[q.id] === 'string' ? (answers[q.id] as string) : ''}
+              onChange={(e) => onAnswer(q.id, e.target.value)}
+              className={common}
+            />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+        )
+      case 'number':
+        return (
+          <div key={q.id} className="mb-4">
+            <label className="block mb-1">
+              {q.text} {q.required && <span className="text-red-500">*</span>}
+            </label>
+            <input
+              type="number"
+              value={typeof answers[q.id] === 'number' || typeof answers[q.id] === 'string' ? (answers[q.id] as string | number) : ''}
+              onChange={(e) => onAnswer(q.id, e.target.value)}
+              className={common}
+            />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+        )
+      case 'date':
+        return (
+          <div key={q.id} className="mb-4">
+            <label className="block mb-1">
+              {q.text} {q.required && <span className="text-red-500">*</span>}
+            </label>
+            <input
+              type="date"
+              value={typeof answers[q.id] === 'string' ? (answers[q.id] as string) : ''}
+              onChange={(e) => onAnswer(q.id, e.target.value)}
+              className={common}
+            />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+        )
       case 'select':
-        return <div key={q.id} className="mb-4">
-          <label className="block mb-1">{q.text} {q.required && <span className="text-red-500">*</span>}</label>
-          <select value={answers[q.id] || ''} onChange={e => onAnswer(q.id, e.target.value)} className="w-full p-2 border rounded">
-            <option value="">選択してください</option>
-            {q.options?.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
-          {q.required && (answers[q.id] === undefined || answers[q.id] === '') && <p className="text-red-500 text-sm">この項目は必須です。</p>}
-        </div>
+        return (
+          <div key={q.id} className="mb-4">
+            <label className="block mb-1">
+              {q.text} {q.required && <span className="text-red-500">*</span>}
+            </label>
+            <select
+              value={typeof answers[q.id] === 'string' || typeof answers[q.id] === 'number' ? (answers[q.id] as string | number) : ''}
+              onChange={(e) => onAnswer(q.id, e.target.value)}
+              className={common}
+            >
+              <option value="">選択してください</option>
+              {q.options?.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+        )
       case 'multi_select':
-        return <div key={q.id} className="mb-4">
-          <label className="block mb-1">{q.text} {q.required && <span className="text-red-500">*</span>}</label>
-          {q.options?.map((option, index) => (
-            <div key={option} className="flex items-center">
-              <input
-                type="checkbox"
-                id={`${q.id}-${index}`}
-                value={option}
-                checked={q.bitflag ? ((answers[q.id] || 0) & (1 << index)) !== 0 : (answers[q.id] || []).includes(option)}
-                onChange={e => {
-                  if (q.bitflag) {
-                    let currentBitflag = answers[q.id] || 0;
-                    if (e.target.checked) {
-                      currentBitflag |= (1 << index);
-                    } else {
-                      currentBitflag &= ~(1 << index);
-                    }
-                    onAnswer(q.id, currentBitflag);
-                  } else {
-                    let currentSelection = answers[q.id] || [];
-                    if (e.target.checked) {
-                      currentSelection = [...currentSelection, option];
-                    } else {
-                      currentSelection = currentSelection.filter((item: string) => item !== option);
-                    }
-                    onAnswer(q.id, currentSelection);
+        return (
+          <div key={q.id} className="mb-4">
+            <label className="block mb-1">
+              {q.text} {q.required && <span className="text-red-500">*</span>}
+            </label>
+            {q.options?.map((option, index) => (
+              <div key={option} className="flex items-center">
+                <input
+                  type="checkbox"
+                  id={`${q.id}-${index}`}
+                  value={option}
+                  checked={
+                    q.bitflag
+                      ? ((typeof answers[q.id] === 'number' ? (answers[q.id] as number) : 0) & (1 << index)) !== 0
+                      : Array.isArray(answers[q.id]) && (answers[q.id] as string[]).includes(option)
                   }
-                }}
-                className="mr-2"
-              />
-              <label htmlFor={`${q.id}-${index}`}>{option}</label>
-            </div>
-          ))}
-          {q.required && (answers[q.id] === undefined || (Array.isArray(answers[q.id]) && answers[q.id].length === 0) || (typeof answers[q.id] === 'number' && answers[q.id] === 0)) && <p className="text-red-500 text-sm">この項目は必須です。</p>}
-        </div>
-      // 他の質問タイプも同様に実装
+                  onChange={(e) => {
+                    if (q.bitflag) {
+                      let cur: number = typeof answers[q.id] === 'number' ? (answers[q.id] as number) : 0
+                      if (e.target.checked) {
+                        cur |= 1 << index
+                      } else {
+                        cur &= ~(1 << index)
+                      }
+                      onAnswer(q.id, cur)
+                    } else {
+                      let cur: string[] = Array.isArray(answers[q.id]) ? (answers[q.id] as string[]) : []
+                      if (e.target.checked) cur = [...cur, option]
+                      else cur = cur.filter((it) => it !== option)
+                      onAnswer(q.id, cur)
+                    }
+                  }}
+                  className="mr-2"
+                />
+                <label htmlFor={`${q.id}-${index}`}>{option}</label>
+              </div>
+            ))}
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+        )
+      case 'coordinate':
+        return (
+          <div key={q.id} className="mb-4">
+            <label className="block mb-1">
+              {q.text} {q.required && <span className="text-red-500">*</span>}
+            </label>
+            <StepPainLocation
+              question={q}
+              value={answers[q.id] as Coordinate | undefined}
+              onChange={(v) => onAnswer(q.id, v)}
+            />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+          </div>
+        )
       default:
-        return <div key={q.id}>{q.text} (未実装)</div>
+        return (
+          <div key={q.id} className="mb-4">
+            {q.text} (未実装)
+          </div>
+        )
     }
   }
 
@@ -109,9 +226,18 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
       <h2 className="text-2xl font-bold mb-4">{template.name}</h2>
       {template.questions.map(renderQuestion)}
       <div className="flex justify-between mt-4">
-        <button onClick={onBack} className="p-2 border rounded-lg">戻る</button>
-        <button onClick={onNext} className={`p-2 border rounded-lg ${isFormValid ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`} disabled={!isFormValid}>次に進む</button>
+        <button onClick={onBack} className="p-2 border rounded-lg">
+          戻る
+        </button>
+        <button
+          onClick={onNext}
+          className={`p-2 border rounded-lg ${isFormValid ? 'bg-blue-500 text-white' : 'bg-gray-400 text-gray-700 cursor-not-allowed'}`}
+          disabled={!isFormValid}
+        >
+          次に進む
+        </button>
       </div>
     </div>
   )
 }
+

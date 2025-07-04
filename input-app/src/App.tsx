@@ -16,11 +16,10 @@ type FormAction =
   | { type: 'CHECK_NOTICE' }
   | { type: 'SELECT_DEPARTMENT'; payload: string }
   | { type: 'SET_TEMPLATE'; payload: Template }
-  | { type: 'ANSWER_QUESTION'; payload: { questionId: string; answer: any } }
+  | { type: 'ANSWER_QUESTION'; payload: { questionId: string; answer: FormState['answers'][string] | undefined } }
   | { type: 'GO_TO_CONFIRM' }
   | { type: 'GO_TO_QRCODE' }
-  | { type: 'GO_BACK' }
-  | { type: 'SET_ERROR'; payload: string | null };
+  | { type: 'GO_BACK' };
 
 const initialState: FormState = {
   step: 'notice',
@@ -38,8 +37,15 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
       return { ...state, departmentId: action.payload };
     case 'SET_TEMPLATE':
       return { ...state, formTemplate: action.payload, step: 'form' };
-    case 'ANSWER_QUESTION':
-      return { ...state, answers: { ...state.answers, [action.payload.questionId]: action.payload.answer } };
+    case 'ANSWER_QUESTION': {
+      const updated: FormState['answers'] = { ...state.answers }
+      if (action.payload.answer === undefined) {
+        delete updated[action.payload.questionId]
+      } else {
+        updated[action.payload.questionId] = action.payload.answer
+      }
+      return { ...state, answers: updated }
+    }
     case 'GO_TO_CONFIRM':
       return { ...state, step: 'confirm' };
     case 'GO_TO_QRCODE':
@@ -52,8 +58,6 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
         case 'qrcode': return { ...state, step: 'confirm' };
         default: return state;
       }
-    case 'SET_ERROR':
-      return { ...state, error: action.payload };
     default:
       return state;
   }
@@ -70,7 +74,7 @@ function App() {
       const template = await fetchTemplate(departmentId);
       dispatch({ type: 'SET_TEMPLATE', payload: template });
       setError(null);
-    } catch (e: any) {
+    } catch {
       setError('テンプレートの取得に失敗しました。再試行してください。');
       // エラー発生時はステップを戻すか、エラー表示専用のステップに遷移させるなど、適切なハンドリングが必要
       // ここではdepartmentに戻る
@@ -110,14 +114,14 @@ function App() {
           payload_over: false,
           errors: [],
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError('QRコードの生成に失敗しました。最初からやり直してください。');
       await sendLog({
           timestamp: new Date().toISOString(),
           department_id: state.departmentId,
           payload_size: 0, // エラー時は0または不明な値
           payload_over: false,
-          errors: [e.message || 'unknown error'],
+          errors: [(e as Error).message || 'unknown error'],
       });
     }
   }
@@ -131,7 +135,14 @@ function App() {
       {state.step === 'notice' && <StepNoticeCheck onNext={() => dispatch({ type: 'CHECK_NOTICE' })} />}
       {state.step === 'department' && <StepDepartmentSelector onSelect={handleSelectDepartment} onBack={() => dispatch({ type: 'GO_BACK' })} />}
       {state.step === 'form' && state.formTemplate && <StepQuestionnaire template={state.formTemplate} answers={state.answers} onAnswer={(questionId, answer) => dispatch({ type: 'ANSWER_QUESTION', payload: { questionId, answer }})} onNext={() => dispatch({ type: 'GO_TO_CONFIRM' })} onBack={() => dispatch({ type: 'GO_BACK' })} />}
-      {state.step === 'confirm' && <StepConfirm answers={state.answers} onConfirm={handleConfirm} onBack={() => dispatch({ type: 'GO_BACK' })} />}
+      {state.step === 'confirm' && state.formTemplate && (
+        <StepConfirm
+          template={state.formTemplate}
+          answers={state.answers}
+          onConfirm={handleConfirm}
+          onBack={() => dispatch({ type: 'GO_BACK' })}
+        />
+      )}
       {state.step === 'qrcode' && <StepQRCode qrData={qrData} onBack={() => dispatch({ type: 'GO_BACK' })} />}
     </div>
   )
