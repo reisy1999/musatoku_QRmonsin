@@ -1,0 +1,2 @@
+import type { FormState } from '../types/Questionnaire';export const formatToCsv = (answers: FormState['answers']): string => {  const header = Object.keys(answers).join(',');  const values = Object.values(answers).map(value => {    if (Array.isArray(value)) {      return `"${value.join('|')}"`;    }    return `"${value}"`;  }).join(',');  return `${header}
+${values}`;};
