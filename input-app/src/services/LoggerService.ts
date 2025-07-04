@@ -7,6 +7,8 @@ export interface LogData {
 }
 
 export const sendLog = async (logData: LogData): Promise<void> => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
   try {
     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/logs`, {
       method: 'POST',
@@ -14,6 +16,7 @@ export const sendLog = async (logData: LogData): Promise<void> => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(logData),
+      signal: controller.signal,
     });
 
     if (response.status === 204) {
@@ -31,6 +34,12 @@ export const sendLog = async (logData: LogData): Promise<void> => {
 
     console.error('LoggerService: unexpected response when sending log');
   } catch (e) {
-    console.error('LoggerService: failed to send log', e);
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      console.error('LoggerService: log request timed out');
+    } else {
+      console.error('LoggerService: failed to send log', e);
+    }
+  } finally {
+    clearTimeout(timeoutId);
   }
 };

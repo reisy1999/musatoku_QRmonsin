@@ -1,12 +1,26 @@
 import JSEncrypt from 'jsencrypt';
 
 export const fetchPublicKey = async (): Promise<string> => {
-  const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_KEY_ENDPOINT}`);
-  if (!response.ok) {
-    throw new Error('Failed to fetch public key');
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+  try {
+    const response = await fetch(
+      `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_KEY_ENDPOINT}`,
+      { signal: controller.signal },
+    );
+    if (!response.ok) {
+      throw new Error('Failed to fetch public key');
+    }
+    const res = (await response.json()) as { public_key: string };
+    return res.public_key;
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') {
+      throw new Error('Fetch public key request timed out');
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  const res = (await response.json()) as { public_key: string };
-  return res.public_key;
 };
 
 export const encryptData = (data: string, publicKey: string): string => {
