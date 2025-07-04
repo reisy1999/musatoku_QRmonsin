@@ -67,3 +67,17 @@ export default tseslint.config([
   },
 ])
 ```
+
+## Environment Variables
+
+Frontend variables are defined in `.env` (see `.env.example`).
+Backend Functions have their own `functions/local.settings.json`.
+
+### Frontend (`.env`)
+- `VITE_API_BASE_URL` - Base URL for the backend API.
+- `VITE_KEY_ENDPOINT` - Endpoint to fetch the RSA public key.
+- `VITE_TEMPLATE_ENDPOINT` - Path to questionnaire templates.
+- `VITE_LOGS_ENDPOINT` - Path to send log data.
+- `VITE_REQUEST_TIMEOUT_MS` - Timeout in milliseconds for API requests.
+
+Create your own `.env` based on this template.
