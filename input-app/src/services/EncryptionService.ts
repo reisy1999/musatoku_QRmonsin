@@ -1,12 +1,10 @@
 import JSEncrypt from 'jsencrypt';
+import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 
 export const fetchPublicKey = async (): Promise<string> => {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 5000);
   try {
-    const response = await fetch(
+    const response = await fetchWithTimeout(
       `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_KEY_ENDPOINT}`,
-      { signal: controller.signal },
     );
     if (!response.ok) {
       throw new Error('Failed to fetch public key');
@@ -15,11 +13,10 @@ export const fetchPublicKey = async (): Promise<string> => {
     return res.public_key;
   } catch (e) {
     if (e instanceof DOMException && e.name === 'AbortError') {
+      console.warn('EncryptionService: public key request timed out');
       throw new Error('Fetch public key request timed out');
     }
     throw e;
-  } finally {
-    clearTimeout(timeoutId);
   }
 };
 
