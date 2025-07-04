@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import type { Template, Question, Coordinate, FormState } from '../types/Questionnaire'
 import { StepPainLocation } from './StepPainLocation'
 
@@ -45,19 +44,6 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
     }
     return null
   }
-
-  // remove answers for hidden questions
-  useEffect(() => {
-    template.questions.forEach((q) => {
-      if (q.conditional_on) {
-        const target = answers[q.conditional_on.field]
-        if (target !== q.conditional_on.value && answers[q.id] !== undefined) {
-          onAnswer(q.id, undefined)
-        }
-      }
-    })
-  }, [answers, template, onAnswer])
-
   const errors = template.questions.reduce<Record<string, string | null>>((acc, q) => {
     acc[q.id] = getError(q)
     return acc
