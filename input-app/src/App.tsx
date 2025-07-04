@@ -29,6 +29,25 @@ const initialState: FormState = {
   answers: {},
 };
 
+const clearHiddenAnswers = (template: Template | null, answers: FormState['answers']): FormState['answers'] => {
+  if (!template) return answers;
+  let changed = true;
+  const result: FormState['answers'] = { ...answers };
+  while (changed) {
+    changed = false;
+    for (const q of template.questions) {
+      if (q.conditional_on) {
+        const target = result[q.conditional_on.field];
+        if (target !== q.conditional_on.value && q.id in result) {
+          delete result[q.id];
+          changed = true;
+        }
+      }
+    }
+  }
+  return result;
+};
+
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'CHECK_NOTICE':
@@ -44,7 +63,8 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
       } else {
         updated[action.payload.questionId] = action.payload.answer
       }
-      return { ...state, answers: updated }
+      const cleaned = clearHiddenAnswers(state.formTemplate, updated)
+      return { ...state, answers: cleaned }
     }
     case 'GO_TO_CONFIRM':
       return { ...state, step: 'confirm' };
