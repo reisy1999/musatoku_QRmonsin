@@ -29,6 +29,25 @@ const initialState: FormState = {
   answers: {},
 };
 
+const clearHiddenAnswers = (template: Template | null, answers: FormState['answers']): FormState['answers'] => {
+  if (!template) return answers;
+  let changed = true;
+  const result: FormState['answers'] = { ...answers };
+  while (changed) {
+    changed = false;
+    for (const q of template.questions) {
+      if (q.conditional_on) {
+        const target = result[q.conditional_on.field];
+        if (target !== q.conditional_on.value && q.id in result) {
+          delete result[q.id];
+          changed = true;
+        }
+      }
+    }
+  }
+  return result;
+};
+
 const formReducer = (state: FormState, action: FormAction): FormState => {
   switch (action.type) {
     case 'CHECK_NOTICE':
@@ -44,7 +63,8 @@ const formReducer = (state: FormState, action: FormAction): FormState => {
       } else {
         updated[action.payload.questionId] = action.payload.answer
       }
-      return { ...state, answers: updated }
+      const cleaned = clearHiddenAnswers(state.formTemplate, updated)
+      return { ...state, answers: cleaned }
     }
     case 'GO_TO_CONFIRM':
       return { ...state, step: 'confirm' };
@@ -93,7 +113,7 @@ function App() {
       if (base64.length > state.formTemplate!.max_payload_bytes) {
           await sendLog({
               timestamp: new Date().toISOString(),
-              department_id: state.departmentId,
+              department_id: Number(state.departmentId),
               payload_size: base64.length,
               payload_over: true,
               errors: ['payload size over'],
@@ -109,7 +129,7 @@ function App() {
 
       await sendLog({
           timestamp: new Date().toISOString(),
-          department_id: state.departmentId,
+          department_id: Number(state.departmentId),
           payload_size: base64.length,
           payload_over: false,
           errors: [],
@@ -118,7 +138,7 @@ function App() {
       setError('QRコードの生成に失敗しました。最初からやり直してください。');
       await sendLog({
           timestamp: new Date().toISOString(),
-          department_id: state.departmentId,
+          department_id: Number(state.departmentId),
           payload_size: 0, // エラー時は0または不明な値
           payload_over: false,
           errors: [(e as Error).message || 'unknown error'],
