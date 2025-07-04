@@ -113,7 +113,7 @@ function App() {
       if (base64.length > state.formTemplate!.max_payload_bytes) {
           await sendLog({
               timestamp: new Date().toISOString(),
-              department_id: state.departmentId,
+              department_id: Number(state.departmentId),
               payload_size: base64.length,
               payload_over: true,
               errors: ['payload size over'],
@@ -129,7 +129,7 @@ function App() {
 
       await sendLog({
           timestamp: new Date().toISOString(),
-          department_id: state.departmentId,
+          department_id: Number(state.departmentId),
           payload_size: base64.length,
           payload_over: false,
           errors: [],
@@ -138,7 +138,7 @@ function App() {
       setError('QRコードの生成に失敗しました。最初からやり直してください。');
       await sendLog({
           timestamp: new Date().toISOString(),
-          department_id: state.departmentId,
+          department_id: Number(state.departmentId),
           payload_size: 0, // エラー時は0または不明な値
           payload_over: false,
           errors: [(e as Error).message || 'unknown error'],
