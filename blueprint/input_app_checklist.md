@@ -3,6 +3,11 @@
 このチェックリストは `input-app-blueprint.md` に基づき、Google Gemini CLI によって自動生成された `input-app` の実装が設計と一致しているか詳細に確認するためのものです。
 
 ---
+## 0. 🎯 アプリの目的
+
+- [ ] 回答データはネット送信せず暗号化してQRコード化するのみ
+- [ ] テンプレート取得・公開鍵取得・ログ送信以外の通信を行わない
+
 
 ## 1. 📂 ディレクトリ構成とファイル配置
 
@@ -33,11 +38,18 @@
 
 - [ ] `useReducer` による状態管理でステップを切り替えている  
 - [ ] ステップ構成：  
-  - [ ] StepNoticeCheck  
-  - [ ] StepDepartmentSelector  
-  - [ ] StepQuestionnaire  
-  - [ ] StepConfirm  
-  - [ ] StepQRCode  
+  - [ ] StepNoticeCheck
+    - [ ] チェックボックスをオンにしないと次へ進めない
+  - [ ] StepDepartmentSelector
+    - [ ] 選択後、TemplateLoader.ts でテンプレートを取得
+  - [ ] StepQuestionnaire
+    - [ ] JSONテンプレートに従い質問を動的表示
+    - [ ] `conditional_on` 条件で表示を制御
+  - [ ] StepConfirm
+    - [ ] 回答内容を一覧表示
+  - [ ] StepQRCode
+    - [ ] EncryptionService.ts で暗号化してQR生成
+    - [ ] LoggerService.ts で生成ログを送信
 
 ---
 
@@ -63,6 +75,7 @@
   - [ ] number → min / max  
   - [ ] date / select → required  
   - [ ] multi_select（bitflag）→ 1つ以上選択必須  
+- [ ] エラーは入力欄下にインライン表示し、進行ボタンを無効化
 
 ---
 
@@ -71,6 +84,7 @@
 - [ ] StepNoticeCheck を除き「戻る」ボタンがある  
 - [ ] 戻った際に入力状態を保持している  
 - [ ] `conditional_on` 条件が変化したら該当回答を自動削除  
+- [ ] 戻る遷移順：`qrcode`→`confirm`→`form`→`department`→`notice`
 
 ---
 
