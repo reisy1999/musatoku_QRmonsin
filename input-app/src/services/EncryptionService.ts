@@ -5,8 +5,8 @@ export const fetchPublicKey = async (): Promise<string> => {
   if (!response.ok) {
     throw new Error('Failed to fetch public key');
   }
-  const key = await response.text();
-  return key;
+  const res = (await response.json()) as { public_key: string };
+  return res.public_key;
 };
 
 export const encryptData = (data: string, publicKey: string): string => {

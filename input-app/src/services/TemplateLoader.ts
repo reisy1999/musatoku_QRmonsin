@@ -5,5 +5,6 @@ export const fetchTemplate = async (departmentId: string): Promise<Template> => 
   if (!response.ok) {
     throw new Error('Failed to fetch template');
   }
-  return response.json();
+  const res = (await response.json()) as { template: Template };
+  return res.template;
 };
