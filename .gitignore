@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Production builds
+dist/
+.vite/
+
+# macOS metadata files
+.DS_Store
+
+# Log files
+*.log
+
+# Ignore mistakenly generated root package-lock
+/package-lock.json
