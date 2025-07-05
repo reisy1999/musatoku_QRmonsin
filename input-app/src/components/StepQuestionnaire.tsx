@@ -1,5 +1,5 @@
 import type { Template, Question, Coordinate, FormState } from '../types/Questionnaire'
-import { StepPainLocation } from './StepPainLocation'
+import CoordinatePicker from './CoordinatePicker'
 
 interface Props {
   template: Template
@@ -24,6 +24,9 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
         return 'この項目は必須です。'
       }
       if (Array.isArray(v) && v.length === 0) {
+        return 'この項目は必須です。'
+      }
+      if (q.type === 'coordinate' && (v === undefined || v === null || (v as Coordinate).x === undefined || (v as Coordinate).y === undefined)) {
         return 'この項目は必須です。'
       }
     }
@@ -67,7 +70,7 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
         return (
           <div key={q.id} className="mb-4">
             <label className="block mb-1">
-              {q.text} {q.required && <span className="text-red-500">*</span>}
+              {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="text"
@@ -82,7 +85,7 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
         return (
           <div key={q.id} className="mb-4">
             <label className="block mb-1">
-              {q.text} {q.required && <span className="text-red-500">*</span>}
+              {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
             <textarea
               value={typeof answers[q.id] === 'string' ? (answers[q.id] as string) : ''}
@@ -96,7 +99,7 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
         return (
           <div key={q.id} className="mb-4">
             <label className="block mb-1">
-              {q.text} {q.required && <span className="text-red-500">*</span>}
+              {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="number"
@@ -111,7 +114,7 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
         return (
           <div key={q.id} className="mb-4">
             <label className="block mb-1">
-              {q.text} {q.required && <span className="text-red-500">*</span>}
+              {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="date"
@@ -126,7 +129,7 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
         return (
           <div key={q.id} className="mb-4">
             <label className="block mb-1">
-              {q.text} {q.required && <span className="text-red-500">*</span>}
+              {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
             <select
               value={typeof answers[q.id] === 'string' || typeof answers[q.id] === 'number' ? (answers[q.id] as string | number) : ''}
@@ -147,7 +150,7 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
         return (
           <div key={q.id} className="mb-4">
             <label className="block mb-1">
-              {q.text} {q.required && <span className="text-red-500">*</span>}
+              {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
             {q.options?.map((option, index) => (
               <div key={option} className="flex items-center">
@@ -188,13 +191,15 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
         return (
           <div key={q.id} className="mb-4">
             <label className="block mb-1">
-              {q.text} {q.required && <span className="text-red-500">*</span>}
+              {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
-            <StepPainLocation
-              question={q}
-              value={answers[q.id] as Coordinate | undefined}
-              onChange={(v) => onAnswer(q.id, v)}
-            />
+            {q.image && (
+              <CoordinatePicker
+                imageSrc={q.image}
+                value={answers[q.id] as Coordinate | undefined}
+                onChange={(v) => onAnswer(q.id, v)}
+              />
+            )}
             {error && <p className="text-red-500 text-sm">{error}</p>}
           </div>
         )

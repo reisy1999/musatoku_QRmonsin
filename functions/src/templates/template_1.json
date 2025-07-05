@@ -1,16 +1,42 @@
 {
-  "template_id": "T001",
-  "department_name": "Internal Medicine",
+  "department_id": 1,
+  "department_name": "内科",
+  "version": "2.0",
+  "max_payload_bytes": 1600,
   "questions": [
     {
-      "question_id": "Q1",
-      "text": "What are your symptoms?",
-      "type": "text"
+      "id": "q1",
+      "label": "受診予定日",
+      "type": "date",
+      "required": true
     },
     {
-      "question_id": "Q2",
-      "text": "Do you have any allergies?",
-      "type": "boolean"
+      "id": "q2",
+      "label": "症状",
+      "type": "multi_select",
+      "bitflag": true,
+      "options": [
+        { "id": 1, "label": "発熱" },
+        { "id": 2, "label": "頭痛" },
+        { "id": 4, "label": "咳" },
+        { "id": 8, "label": "喉の痛み" }
+      ],
+      "required": true
+    },
+    {
+      "id": "q3",
+      "label": "補足コメント",
+      "type": "textarea",
+      "maxLength": 100,
+      "conditional_on": "q2",
+      "conditional_value": [99]
+    },
+    {
+      "id": "q4",
+      "label": "痛みのある場所を身体図で示してください",
+      "type": "coordinate",
+      "image": "/assets/body-front.png",
+      "required": true
     }
   ]
 }

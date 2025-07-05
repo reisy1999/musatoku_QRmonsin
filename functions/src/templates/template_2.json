@@ -1,16 +1,27 @@
 {
-  "template_id": "T002",
-  "department_name": "Pediatrics",
+  "department_id": 2,
+  "department_name": "小児科",
+  "version": "2.0",
+  "max_payload_bytes": 1600,
   "questions": [
     {
-      "question_id": "Q1",
-      "text": "What is the child's temperature?",
-      "type": "text"
+      "id": "q1",
+      "label": "お子様の年齢",
+      "type": "number",
+      "min": 0,
+      "max": 15,
+      "required": true
     },
     {
-      "question_id": "Q2",
-      "text": "Is the child up to date on vaccinations?",
-      "type": "boolean"
+      "id": "q2",
+      "label": "予防接種は最新ですか？",
+      "type": "select",
+      "options": [
+        { "id": 1, "label": "はい" },
+        { "id": 2, "label": "いいえ" },
+        { "id": 3, "label": "不明" }
+      ],
+      "required": true
     }
   ]
 }
