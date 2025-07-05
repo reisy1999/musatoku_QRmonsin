@@ -1,10 +1,11 @@
 import JSEncrypt from 'jsencrypt';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
+import { API_BASE_URL, KEY_ENDPOINT } from '../api/apiConfig';
 
 export const fetchPublicKey = async (): Promise<string> => {
   try {
     const response = await fetchWithTimeout(
-      `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_KEY_ENDPOINT}`,
+      `${API_BASE_URL}${KEY_ENDPOINT}`,
     );
     if (!response.ok) {
       throw new Error('Failed to fetch public key');

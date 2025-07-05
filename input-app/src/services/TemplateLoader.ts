@@ -1,10 +1,11 @@
 import type { Template } from '../types/Questionnaire';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
+import { API_BASE_URL, TEMPLATE_ENDPOINT } from '../api/apiConfig';
 
 export const fetchTemplate = async (departmentId: string): Promise<Template> => {
   try {
     const response = await fetchWithTimeout(
-      `${import.meta.env.VITE_API_BASE_URL}${import.meta.env.VITE_TEMPLATE_ENDPOINT}/${departmentId}`,
+      `${API_BASE_URL}${TEMPLATE_ENDPOINT}/${departmentId}`,
     );
     if (!response.ok) {
       const errorBody = await response.text();

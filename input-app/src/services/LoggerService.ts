@@ -7,10 +7,11 @@ export interface LogData {
 }
 
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
+import { API_BASE_URL, LOG_ENDPOINT } from '../api/apiConfig';
 
 export const sendLog = async (logData: LogData): Promise<void> => {
   try {
-    const response = await fetchWithTimeout(`${import.meta.env.VITE_API_BASE_URL}/logs`, {
+    const response = await fetchWithTimeout(`${API_BASE_URL}${LOG_ENDPOINT}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
