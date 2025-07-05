@@ -17,7 +17,7 @@ export const mockAzureApiPlugin = (): Plugin => ({
       if (req.method === 'GET' && req.url === '/api/public-key') {
         const keyPath = path.resolve(
           __dirname,
-          '../azurevaultkey/public.pem',
+          '../../../mock/azurevaultkey/public.pem',
         )
         try {
           const publicKey = await fs.readFile(keyPath, 'utf-8')
