@@ -3,10 +3,13 @@
 
 import type { Plugin } from 'vite'
 import { promises as fs } from 'node:fs'
-import { resolve, dirname } from 'node:path'
+import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const currentDir = dirname(fileURLToPath(import.meta.url))
+// Resolve the project root relative to this file. The plugin may be
+// moved around inside the repository but the resources it uses live two
+// directories above the plugin location.
+const projectRoot = fileURLToPath(new URL('../..', import.meta.url))
 
 export const mockAzureApiPlugin = (): Plugin => ({
   name: 'vite-plugin-mock-azure-api',
@@ -18,10 +21,9 @@ export const mockAzureApiPlugin = (): Plugin => ({
 
       // このエンドポイントは Azure Functions の GetPublicKey に対応
       if (req.method === 'GET' && req.url === '/api/public-key') {
-        const keyPath = resolve(
-          currentDir,
-          '../../../mock/azurevaultkey/public.pem',
-        )
+        // Public key used by the mock API. Its location is fixed under the
+        // `mock/azurevaultkey` directory in the project root.
+        const keyPath = resolve(projectRoot, 'mock/azurevaultkey/public.pem')
         try {
           const publicKey = await fs.readFile(keyPath, 'utf-8')
           res.setHeader('Content-Type', 'application/json')
@@ -42,8 +44,9 @@ export const mockAzureApiPlugin = (): Plugin => ({
       if (req.method === 'GET' && req.url.startsWith('/api/templates/')) {
         const id = req.url.split('/').pop() || ''
         const templatePath = resolve(
-          currentDir,
-          `../../../functions/src/templates/template_${id}.json`,
+          projectRoot,
+          'functions/src/templates',
+          `template_${id}.json`,
         )
         try {
           const data = await fs.readFile(templatePath, 'utf-8')
