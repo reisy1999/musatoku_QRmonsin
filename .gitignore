@@ -11,5 +11,8 @@ dist/
 # Log files
 *.log
 
+# Local mock API public key
+mock/azurevaultkey/public.pem
+
 # Ignore mistakenly generated root package-lock
 /package-lock.json
