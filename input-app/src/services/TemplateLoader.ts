@@ -2,6 +2,8 @@ import type { Template } from '../types/Questionnaire';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 import { API_BASE_URL, TEMPLATE_ENDPOINT } from '../api/apiConfig';
 
+// 本番環境では Azure Functions 経由でテンプレートを取得する
+
 export const fetchTemplate = async (departmentId: string): Promise<Template> => {
   try {
     const response = await fetchWithTimeout(

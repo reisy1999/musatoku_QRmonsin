@@ -9,6 +9,8 @@ export interface LogData {
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 import { API_BASE_URL, LOG_ENDPOINT } from '../api/apiConfig';
 
+// 本番環境では Azure Functions 経由でログ送信が行われる
+
 export const sendLog = async (logData: LogData): Promise<void> => {
   try {
     const response = await fetchWithTimeout(`${API_BASE_URL}${LOG_ENDPOINT}`, {
