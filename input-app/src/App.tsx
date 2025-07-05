@@ -7,7 +7,7 @@ import { StepQRCode } from './components/StepQRCode';
 import type { FormState, Template } from './types/Questionnaire';
 import { fetchTemplate } from './services/TemplateLoader';
 import { formatToCsv } from './utils/csvFormatter';
-import { toShiftJIS } from './utils/encoding';
+import { toShiftJIS, uint8ToBase64 } from './utils/encoding';
 import { compress } from './utils/compressor';
 import { fetchPublicKey, encryptData } from './services/EncryptionService';
 import { sendLog } from './services/LoggerService';
@@ -108,7 +108,7 @@ function App() {
       const csv = formatToCsv(state.answers);
       const sjis = toShiftJIS(csv);
       const compressed = compress(sjis);
-      const base64 = btoa(String.fromCharCode(...compressed));
+      const base64 = uint8ToBase64(compressed);
 
       if (base64.length > state.formTemplate!.max_payload_bytes) {
           await sendLog({
@@ -143,6 +143,7 @@ function App() {
           payload_over: false,
           errors: [(e as Error).message || 'unknown error'],
       });
+      console.error('QR code generation error:', e);
     }
   }
 

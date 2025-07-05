@@ -1,4 +1,4 @@
-import * as QRCode from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 interface Props {
   qrData: string;
@@ -25,7 +25,7 @@ export const StepQRCode = ({ qrData, onBack }: Props) => {
         
         <div className="flex justify-center p-4 bg-gray-100 rounded-lg">
           {qrData ? (
-            <QRCode.default value={qrData} size={256} level="L" />
+            <QRCodeCanvas value={qrData} size={256} level="L" />
           ) : (
             <div className="w-64 h-64 flex items-center justify-center bg-gray-200 text-gray-500">
               QRコードの生成に失敗しました

@@ -1,41 +1,26 @@
+
 {
   "department_id": 1,
-  "department_name": "内科",
-  "version": "2.0",
-  "max_payload_bytes": 1600,
+  "department_name": "総合受付",
+  "version": "1.0",
   "questions": [
     {
       "id": "q1",
-      "label": "受診予定日",
-      "type": "date",
+      "label": "お名前",
+      "type": "text",
       "required": true
     },
     {
       "id": "q2",
-      "label": "症状",
-      "type": "multi_select",
-      "bitflag": true,
-      "options": [
-        { "id": 1, "label": "発熱" },
-        { "id": 2, "label": "頭痛" },
-        { "id": 4, "label": "咳" },
-        { "id": 8, "label": "喉の痛み" }
-      ],
-      "required": true
+      "label": "主な症状",
+      "type": "textarea",
+      "required": true,
+      "maxLength": 200
     },
     {
       "id": "q3",
-      "label": "補足コメント",
-      "type": "textarea",
-      "maxLength": 100,
-      "conditional_on": "q2",
-      "conditional_value": [99]
-    },
-    {
-      "id": "q4",
-      "label": "痛みのある場所を身体図で示してください",
-      "type": "coordinate",
-      "image": "/assets/body-front.png",
+      "label": "受診希望日",
+      "type": "date",
       "required": true
     }
   ]

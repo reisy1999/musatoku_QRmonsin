@@ -1,27 +1,64 @@
+
 {
   "department_id": 2,
-  "department_name": "小児科",
-  "version": "2.0",
-  "max_payload_bytes": 1600,
+  "department_name": "内科",
+  "version": "2.1",
+  "max_payload_bytes": 2000,
   "questions": [
     {
-      "id": "q1",
-      "label": "お子様の年齢",
-      "type": "number",
-      "min": 0,
-      "max": 15,
-      "required": true
+      "id": "q1_symptoms",
+      "label": "現在お困りの症状をすべて選択してください",
+      "type": "multi_select",
+      "required": true,
+      "bitflag": true,
+      "options": [
+        { "id": 1, "label": "発熱" },
+        { "id": 2, "label": "咳" },
+        { "id": 4, "label": "喉の痛み" },
+        { "id": 8, "label": "頭痛" },
+        { "id": 16, "label": "腹痛" },
+        { "id": 32, "label": "下痢" },
+        { "id": 64, "label": "その他" }
+      ]
     },
     {
-      "id": "q2",
-      "label": "予防接種は最新ですか？",
+      "id": "q2_fever_details",
+      "label": "体温（℃）",
+      "type": "number",
+      "required": true,
+      "min": 35.0,
+      "max": 42.0,
+      "placeholder": "例: 37.5",
+      "conditional_on": "q1_symptoms",
+      "conditional_value": [1]
+    },
+    {
+      "id": "q3_other_symptoms",
+      "label": "『その他』を選んだ方は、具体的な症状を記入してください",
+      "type": "textarea",
+      "required": true,
+      "maxLength": 150,
+      "conditional_on": "q1_symptoms",
+      "conditional_value": [64]
+    },
+    {
+      "id": "q4_postal_code",
+      "label": "郵便番号（ハイフンなし）",
+      "type": "text",
+      "required": false,
+      "placeholder": "例: 1000001",
+      "validationRegex": "^[0-9]{7}$"
+    },
+    {
+      "id": "q5_contact_method",
+      "label": "ご希望の連絡方法",
       "type": "select",
+      "required": true,
+      "defaultValue": "phone",
       "options": [
-        { "id": 1, "label": "はい" },
-        { "id": 2, "label": "いいえ" },
-        { "id": 3, "label": "不明" }
-      ],
-      "required": true
+        { "id": "phone", "label": "電話" },
+        { "id": "email", "label": "メール" }
+      ]
     }
   ]
 }

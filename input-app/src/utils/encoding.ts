@@ -1,10 +1,27 @@
-import { convert } from 'encoding-japanese';
+import Encoding from 'encoding-japanese';
 
 export const toShiftJIS = (text: string): Uint8Array => {
-  const result = convert(text, {
+  const sjisBytes = Encoding.convert(text, {
     to: 'SJIS',
     from: 'UNICODE',
-    type: 'arraybuffer'
+    type: 'array',
   });
-  return new Uint8Array(result as ArrayBuffer);
+  return new Uint8Array(sjisBytes);
+};
+
+export const fromShiftJIS = (bytes: Uint8Array): string => {
+  const unicodeString = Encoding.convert(bytes, {
+    to: 'UNICODE',
+    from: 'SJIS',
+    type: 'string',
+  });
+  return unicodeString;
+};
+
+export const uint8ToBase64 = (uint8Array: Uint8Array): string => {
+  let binary = '';
+  uint8Array.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary);
 };

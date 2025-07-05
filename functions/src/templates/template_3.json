@@ -1,0 +1,46 @@
+
+{
+  "department_id": 3,
+  "department_name": "整形外科",
+  "version": "2.1",
+  "max_payload_bytes": 2200,
+  "questions": [
+    {
+      "id": "q1_pain_area",
+      "label": "痛む箇所をすべて選択してください",
+      "type": "multi_select",
+      "required": true,
+      "bitflag": true,
+      "options": [
+        { "id": 1, "label": "首" },
+        { "id": 2, "label": "肩" },
+        { "id": 4, "label": "腰" },
+        { "id": 8, "label": "膝" },
+        { "id": 16, "label": "足首" },
+        { "id": 32, "label": "その他" }
+      ]
+    },
+    {
+      "id": "q2_pain_point",
+      "label": "最も痛む場所を、下の図からタップして教えてください",
+      "type": "coordinate",
+      "required": true,
+      "image": "body-front.png"
+    },
+    {
+      "id": "q3_injury_date",
+      "label": "いつから痛みますか？",
+      "type": "date",
+      "required": true
+    },
+    {
+      "id": "q4_other_details",
+      "label": "『その他』を選んだ方は、具体的な部位を記入してください",
+      "type": "textarea",
+      "required": true,
+      "maxLength": 100,
+      "conditional_on": "q1_pain_area",
+      "conditional_value": [32]
+    }
+  ]
+}
