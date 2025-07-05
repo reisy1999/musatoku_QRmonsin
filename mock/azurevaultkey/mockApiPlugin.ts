@@ -2,8 +2,11 @@
 // Each route explicitly mirrors an Azure Function that will exist in production.
 
 import type { Plugin } from 'vite'
-import { promises as fs } from 'fs'
-import path from 'path'
+import { promises as fs } from 'node:fs'
+import { resolve, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const currentDir = dirname(fileURLToPath(import.meta.url))
 
 export const mockAzureApiPlugin = (): Plugin => ({
   name: 'vite-plugin-mock-azure-api',
@@ -15,8 +18,8 @@ export const mockAzureApiPlugin = (): Plugin => ({
 
       // このエンドポイントは Azure Functions の GetPublicKey に対応
       if (req.method === 'GET' && req.url === '/api/public-key') {
-        const keyPath = path.resolve(
-          __dirname,
+        const keyPath = resolve(
+          currentDir,
           '../../../mock/azurevaultkey/public.pem',
         )
         try {
@@ -38,8 +41,8 @@ export const mockAzureApiPlugin = (): Plugin => ({
       // このエンドポイントは Azure Functions の GetTemplate に対応
       if (req.method === 'GET' && req.url.startsWith('/api/templates/')) {
         const id = req.url.split('/').pop() || ''
-        const templatePath = path.resolve(
-          __dirname,
+        const templatePath = resolve(
+          currentDir,
           `../../../functions/src/templates/template_${id}.json`,
         )
         try {
