@@ -138,8 +138,8 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
             >
               <option value="">選択してください</option>
               {q.options?.map((option) => (
-                <option key={option} value={option}>
-                  {option}
+                <option key={option.id} value={option.id}>
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -152,36 +152,37 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
             <label className="block mb-1">
               {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
-            {q.options?.map((option, index) => (
-              <div key={option} className="flex items-center">
+              {q.options?.map((option, index) => (
+                // console.log(option) // デバッグ用: オプション構造を確認
+                <div key={option.id} className="flex items-center">
                 <input
                   type="checkbox"
                   id={`${q.id}-${index}`}
-                  value={option}
+                  value={option.id}
                   checked={
                     q.bitflag
-                      ? ((typeof answers[q.id] === 'number' ? (answers[q.id] as number) : 0) & (1 << index)) !== 0
-                      : Array.isArray(answers[q.id]) && (answers[q.id] as string[]).includes(option)
+                      ? ((typeof answers[q.id] === 'number' ? (answers[q.id] as number) : 0) & Number(option.id)) !== 0
+                      : Array.isArray(answers[q.id]) && (answers[q.id] as (string | number)[]).includes(option.id)
                   }
                   onChange={(e) => {
                     if (q.bitflag) {
                       let cur: number = typeof answers[q.id] === 'number' ? (answers[q.id] as number) : 0
                       if (e.target.checked) {
-                        cur |= 1 << index
+                        cur |= Number(option.id)
                       } else {
-                        cur &= ~(1 << index)
+                        cur &= ~Number(option.id)
                       }
                       onAnswer(q.id, cur)
                     } else {
-                      let cur: string[] = Array.isArray(answers[q.id]) ? (answers[q.id] as string[]) : []
-                      if (e.target.checked) cur = [...cur, option]
-                      else cur = cur.filter((it) => it !== option)
+                      let cur: (string | number)[] = Array.isArray(answers[q.id]) ? (answers[q.id] as (string | number)[]) : []
+                      if (e.target.checked) cur = [...cur, option.id]
+                      else cur = cur.filter((it) => it !== option.id)
                       onAnswer(q.id, cur)
                     }
                   }}
                   className="mr-2"
                 />
-                <label htmlFor={`${q.id}-${index}`}>{option}</label>
+                <label htmlFor={`${q.id}-${index}`}>{option.label}</label>
               </div>
             ))}
             {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -206,7 +207,7 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
       default:
         return (
           <div key={q.id} className="mb-4">
-            {q.text} (未実装)
+            {q.label} (未実装)
           </div>
         )
     }

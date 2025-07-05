@@ -21,7 +21,7 @@ export const StepPainLocation = ({ question, value, onChange }: Props) => {
     <div className="relative" ref={containerRef}>
       <img
         src={question.image || '/vite.svg'}
-        alt={question.text}
+        alt={question.label}
         onClick={handleClick}
         className="w-full max-w-xs mx-auto"
       />

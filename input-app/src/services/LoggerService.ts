@@ -13,7 +13,10 @@ import { API_BASE_URL, LOG_ENDPOINT } from '../api/apiConfig';
 
 export const sendLog = async (logData: LogData): Promise<void> => {
   try {
-    const response = await fetchWithTimeout(`${API_BASE_URL}${LOG_ENDPOINT}`, {
+    const url = `${API_BASE_URL}${LOG_ENDPOINT}`
+    // 送信内容をデバッグ出力。表示されない場合、mockApiPlugin までリクエストが届いていない可能性がある。
+    console.log('sendLog request', url, logData)
+    const response = await fetchWithTimeout(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

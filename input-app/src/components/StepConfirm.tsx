@@ -31,9 +31,25 @@ export const StepConfirm = ({ template, answers, onConfirm, onBack }: Props) => 
 
   const getDisplayValue = (q: Question, value: FormState['answers'][string]): string => {
     if (value === undefined || value === null) return ''
-    if (Array.isArray(value)) return value.join(', ')
+    if (Array.isArray(value)) {
+      if (q.options) {
+        return q.options
+          .filter((opt) => (value as (string | number)[]).includes(opt.id))
+          .map((opt) => opt.label)
+          .join(', ')
+      }
+      return value.join(', ')
+    }
     if (q.type === 'multi_select' && q.bitflag && typeof value === 'number') {
-      return q.options?.filter((_, index) => (value & (1 << index)) !== 0).join(', ') || ''
+      return (
+        q.options
+          ?.filter((opt) => (value & Number(opt.id)) !== 0)
+          .map((opt) => opt.label)
+          .join(', ') || ''
+      )
+    }
+    if (q.type === 'select' && q.options) {
+      return q.options.find((opt) => opt.id === value)?.label || String(value)
     }
     if (typeof value === 'object') return '' // coordinateは別途処理
     return String(value)
@@ -65,11 +81,11 @@ export const StepConfirm = ({ template, answers, onConfirm, onBack }: Props) => 
               const c = value as Coordinate
               return (
                 <li key={q.id} className="my-2">
-                  <div><strong>{q.text}:</strong></div>
+                  <div><strong>{q.label}:</strong></div>
                   <div className="relative w-48 h-48">
                     <img
                       src={q.image || '/vite.svg'}
-                      alt={q.text}
+                      alt={q.label}
                       className="w-full h-full"
                     />
                     <div
@@ -87,7 +103,7 @@ export const StepConfirm = ({ template, answers, onConfirm, onBack }: Props) => 
             }
             return (
               <li key={q.id} className="my-2">
-                <strong>{q.text}:</strong> {getDisplayValue(q, value)}
+                <strong>{q.label}:</strong> {getDisplayValue(q, value)}
               </li>
             )
           })}

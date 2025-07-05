@@ -4,11 +4,15 @@
 import type { Plugin } from 'vite'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { fileURLToPath } from 'url'
+import type { IncomingMessage, ServerResponse } from 'http'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export const mockAzureApiPlugin = (): Plugin => ({
   name: 'vite-plugin-mock-azure-api',
   async configureServer(server) {
-    server.middlewares.use(async (req, res, next) => {
+    server.middlewares.use(async (req: IncomingMessage, res: ServerResponse, next: () => void) => {
       if (!req.url) {
         return next()
       }
@@ -49,6 +53,7 @@ export const mockAzureApiPlugin = (): Plugin => ({
 
       // このエンドポイントは Azure Functions の SendLog に対応
       if (req.method === 'POST' && req.url === '/api/logs') {
+        console.log('[mock] /api/logs called')
         res.statusCode = 204
         res.setHeader('Access-Control-Allow-Origin', '*')
         res.end()

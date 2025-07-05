@@ -3,9 +3,14 @@ export interface Coordinate {
   y: number;
 }
 
+export interface Option {
+  id: number | string;
+  label: string;
+}
+
 export interface Question {
   id: string;
-  text: string;
+  label: string;
   type:
     | 'text'
     | 'textarea'
@@ -14,7 +19,7 @@ export interface Question {
     | 'select'
     | 'multi_select'
     | 'coordinate';
-  options?: string[];
+  options?: Option[];
   image?: string; // for coordinate questions
   required?: boolean;
   maxLength?: number;
@@ -40,5 +45,5 @@ export interface FormState {
   noticeChecked: boolean;
   departmentId: string;
   formTemplate: Template | null;
-  answers: Record<string, string | string[] | number | Coordinate>;
+  answers: Record<string, string | number | (string | number)[] | Coordinate>;
 }
