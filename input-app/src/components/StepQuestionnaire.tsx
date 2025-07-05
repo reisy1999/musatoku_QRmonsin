@@ -132,14 +132,18 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
               {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
             <select
-              value={typeof answers[q.id] === 'string' || typeof answers[q.id] === 'number' ? (answers[q.id] as string | number) : ''}
+              value={
+                typeof answers[q.id] === 'string' || typeof answers[q.id] === 'number'
+                  ? (answers[q.id] as string | number)
+                  : ''
+              }
               onChange={(e) => onAnswer(q.id, e.target.value)}
               className={common}
             >
               <option value="">選択してください</option>
               {q.options?.map((option) => (
-                <option key={option} value={option}>
-                  {option}
+                <option key={option.id} value={option.id}>
+                  {option.label}
                 </option>
               ))}
             </select>
@@ -152,36 +156,38 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
             <label className="block mb-1">
               {q.label} {q.required && <span className="text-red-500">*</span>}
             </label>
-            {q.options?.map((option, index) => (
-              <div key={option} className="flex items-center">
+            {q.options?.map((option) => (
+              <div key={option.id} className="flex items-center">
                 <input
                   type="checkbox"
-                  id={`${q.id}-${index}`}
-                  value={option}
+                  id={`${q.id}-${option.id}`}
+                  value={option.id}
                   checked={
                     q.bitflag
-                      ? ((typeof answers[q.id] === 'number' ? (answers[q.id] as number) : 0) & (1 << index)) !== 0
-                      : Array.isArray(answers[q.id]) && (answers[q.id] as string[]).includes(option)
+                      ? ((typeof answers[q.id] === 'number' ? (answers[q.id] as number) : 0) & Number(option.id)) !== 0
+                      : Array.isArray(answers[q.id]) && (answers[q.id] as string[]).includes(String(option.id))
                   }
                   onChange={(e) => {
                     if (q.bitflag) {
                       let cur: number = typeof answers[q.id] === 'number' ? (answers[q.id] as number) : 0
+                      const bit = Number(option.id)
                       if (e.target.checked) {
-                        cur |= 1 << index
+                        cur |= bit
                       } else {
-                        cur &= ~(1 << index)
+                        cur &= ~bit
                       }
                       onAnswer(q.id, cur)
                     } else {
                       let cur: string[] = Array.isArray(answers[q.id]) ? (answers[q.id] as string[]) : []
-                      if (e.target.checked) cur = [...cur, option]
-                      else cur = cur.filter((it) => it !== option)
+                      const idStr = String(option.id)
+                      if (e.target.checked) cur = [...cur, idStr]
+                      else cur = cur.filter((it) => it !== idStr)
                       onAnswer(q.id, cur)
                     }
                   }}
                   className="mr-2"
                 />
-                <label htmlFor={`${q.id}-${index}`}>{option}</label>
+                <label htmlFor={`${q.id}-${option.id}`}>{option.label}</label>
               </div>
             ))}
             {error && <p className="text-red-500 text-sm">{error}</p>}
@@ -206,7 +212,7 @@ export const StepQuestionnaire = ({ template, answers, onAnswer, onNext, onBack 
       default:
         return (
           <div key={q.id} className="mb-4">
-            {q.text} (未実装)
+            {q.label} (未実装)
           </div>
         )
     }

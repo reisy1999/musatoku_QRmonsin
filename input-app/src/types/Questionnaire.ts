@@ -3,9 +3,14 @@ export interface Coordinate {
   y: number;
 }
 
+export interface Option {
+  id: string | number
+  label: string
+}
+
 export interface Question {
-  id: string;
-  text: string;
+  id: string
+  label: string
   type:
     | 'text'
     | 'textarea'
@@ -13,8 +18,8 @@ export interface Question {
     | 'date'
     | 'select'
     | 'multi_select'
-    | 'coordinate';
-  options?: string[];
+    | 'coordinate'
+  options?: Option[]
   image?: string; // for coordinate questions
   required?: boolean;
   maxLength?: number;
