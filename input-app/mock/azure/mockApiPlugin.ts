@@ -15,14 +15,23 @@ export const mockAzureApiPlugin = (): Plugin => ({
 
       // このエンドポイントは Azure Functions の GetPublicKey に対応
       if (req.method === 'GET' && req.url === '/api/public-key') {
-        res.setHeader('Content-Type', 'application/json')
-        res.setHeader('Access-Control-Allow-Origin', '*')
-        res.end(
-          JSON.stringify({
-            public_key:
-              '-----BEGIN PUBLIC KEY-----\nFAKEKEY123...\n-----END PUBLIC KEY-----',
-          }),
+        const keyPath = path.resolve(
+          __dirname,
+          '../azurevaultkey/public.pem',
         )
+        try {
+          const publicKey = await fs.readFile(keyPath, 'utf-8')
+          res.setHeader('Content-Type', 'application/json')
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.end(JSON.stringify({ public_key: publicKey }))
+        } catch {
+          res.statusCode = 500
+          res.setHeader('Content-Type', 'application/json')
+          res.setHeader('Access-Control-Allow-Origin', '*')
+          res.end(
+            JSON.stringify({ error: 'Failed to load public key' }),
+          )
+        }
         return
       }
 
