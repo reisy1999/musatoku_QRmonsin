@@ -2,6 +2,8 @@ import JSEncrypt from 'jsencrypt';
 import { fetchWithTimeout } from '../utils/fetchWithTimeout';
 import { API_BASE_URL, KEY_ENDPOINT } from '../api/apiConfig';
 
+// 本番環境では Azure Functions 経由で公開鍵を取得する
+
 export const fetchPublicKey = async (): Promise<string> => {
   try {
     const response = await fetchWithTimeout(

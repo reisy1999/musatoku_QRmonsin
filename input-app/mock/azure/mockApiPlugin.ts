@@ -1,5 +1,5 @@
-// Vite plugin providing mock API routes emulating Azure Functions behavior
-// Each route corresponds to an Azure Function that will exist in production.
+// Vite plugin providing mock API routes emulating Azure Functions behavior.
+// Each route explicitly mirrors an Azure Function that will exist in production.
 
 import type { Plugin } from 'vite'
 import { promises as fs } from 'fs'
@@ -13,7 +13,7 @@ export const mockAzureApiPlugin = (): Plugin => ({
         return next()
       }
 
-      // Azure Functions の GetPublicKey に対応
+      // このエンドポイントは Azure Functions の GetPublicKey に対応
       if (req.method === 'GET' && req.url === '/api/public-key') {
         res.setHeader('Content-Type', 'application/json')
         res.setHeader('Access-Control-Allow-Origin', '*')
@@ -26,7 +26,7 @@ export const mockAzureApiPlugin = (): Plugin => ({
         return
       }
 
-      // Azure Functions の GetTemplate に対応
+      // このエンドポイントは Azure Functions の GetTemplate に対応
       if (req.method === 'GET' && req.url.startsWith('/api/templates/')) {
         const id = req.url.split('/').pop() || ''
         const templatePath = path.resolve(
@@ -47,7 +47,7 @@ export const mockAzureApiPlugin = (): Plugin => ({
         return
       }
 
-      // Azure Functions の SendLog に対応
+      // このエンドポイントは Azure Functions の SendLog に対応
       if (req.method === 'POST' && req.url === '/api/logs') {
         res.statusCode = 204
         res.setHeader('Access-Control-Allow-Origin', '*')
